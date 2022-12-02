@@ -13,7 +13,7 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 const corsOptions = {
-  origin:'http://localhost:3000',
+  origin:'https://mern-stack-frontend.onrender.com',
   credentials:true,
 };
 app.use(bodyparser.json());
