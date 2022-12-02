@@ -13,7 +13,7 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 const corsOptions = {
-  origin:'http://localhost:3001',
+  origin:'http://localhost:3000',
   credentials:true,
 };
 app.use(bodyparser.json());
