@@ -48,7 +48,7 @@ const authController = {
         admin: registeredUser.admin,
       };
       const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "3d",
+        expiresIn: "365d",
       });
 
       return res.status(200).json({
@@ -76,7 +76,7 @@ const authController = {
       },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: "30s",
+        expiresIn: "365d",
       }
     );
   },
