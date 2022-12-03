@@ -130,8 +130,9 @@ const authController = {
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
-           sameSite: "Strict",
-        
+           sameSite: "None",
+       secure: true,
+    httpOnly: true,
             path: "/",
           })
           .json({
@@ -166,8 +167,9 @@ const authController = {
 
       return res
         .cookie("refreshToken", newRefreshToken, {
-          sameSite: "Strict",
-       
+          sameSite: "None",
+       secure: true,
+    httpOnly: true,
           path: "/",
         })
         .status(200)
@@ -177,8 +179,9 @@ const authController = {
   //   Log Out
   userLogout: async (req, res) => {
     res.clearCookie("refreshToken", {
-         sameSite: "Strict",
-       
+         sameSite: "None",
+       secure: true,
+    httpOnly: true,
       path: "/",
     });
     refreshTokens = refreshTokens.filter(
