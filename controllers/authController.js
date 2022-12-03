@@ -231,13 +231,13 @@ const authController = {
         html:
           "<p>Hii " +
           name +
-          ", Please copy the link<a href=http://localhost:3001/reset_password/" +
+          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ màu tím)<a href=https://mern-stack-frontend.onrender.com/reset_password/"+
           token +
-          "> and reset your password " +
+          "> để tiến hành nhập mật khẩu mới </a>" +
           ": " +
-          "http://localhost:3001/reset_password/" +
+          "https://mern-stack-frontend.onrender.com/reset_password/" +
           token +
-          "</a> </p>",
+          "</p>",
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
