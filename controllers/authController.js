@@ -215,9 +215,8 @@ const authController = {
     try {
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        port: 465,
+        secure: true,
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
@@ -231,9 +230,9 @@ const authController = {
         html:
           "<p>Hii " +
           name +
-          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ màu tím)<a href=https://mern-stack-frontend.onrender.com/reset_password/"+
+          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=https://mern-stack-frontend.onrender.com/reset_password/"+
           token +
-          "> để tiến hành nhập mật khẩu mới </a>" +
+          "> để tiến hành nhập mật khẩu mới" </a> +
           ": " +
           "https://mern-stack-frontend.onrender.com/reset_password/" +
           token +
