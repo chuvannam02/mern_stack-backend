@@ -130,7 +130,8 @@ const authController = {
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
-            sameSite: "Lax",
+           sameSite: "None",
+         secure,
             path: "/",
           })
           .json({
@@ -165,7 +166,8 @@ const authController = {
 
       return res
         .cookie("refreshToken", newRefreshToken, {
-          sameSite: "Lax",
+          sameSite: "None",
+         secure,
           path: "/",
         })
         .status(200)
@@ -175,7 +177,8 @@ const authController = {
   //   Log Out
   userLogout: async (req, res) => {
     res.clearCookie("refreshToken", {
-      sameSite: "Lax",
+         sameSite: "None",
+         secure,
       path: "/",
     });
     refreshTokens = refreshTokens.filter(
@@ -232,7 +235,7 @@ const authController = {
           name +
           ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=https://mern-stack-frontend.onrender.com/reset_password/"+
           token +
-          "> để tiến hành nhập mật khẩu mới" </a> +
+          "> để tiến hành nhập mật khẩu mới"+ "</a>" +
           ": " +
           "https://mern-stack-frontend.onrender.com/reset_password/" +
           token +
