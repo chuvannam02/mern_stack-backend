@@ -132,7 +132,7 @@ const authController = {
           .cookie("refreshToken", refreshToken, {
           domain:"mern-stack-frontend.onrender.com",
            sameSite: "None",
-       secure: true,
+       secure,
     httpOnly: true,
             path: "/",
           })
@@ -170,7 +170,7 @@ const authController = {
         .cookie("refreshToken", newRefreshToken, {
         domain:"mern-stack-frontend.onrender.com",
           sameSite: "None",
-       secure: true,
+       secure,
     httpOnly: true,
           path: "/",
         })
@@ -183,7 +183,7 @@ const authController = {
     res.clearCookie("refreshToken", {
       domain:"mern-stack-frontend.onrender.com",
          sameSite: "None",
-       secure: true,
+       secure,
     httpOnly: true,
       path: "/",
     });
