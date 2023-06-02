@@ -20,10 +20,10 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(cors(corsOptions));
 app.use(cookieParser());
-/*
+
 app.use(function (req, res, next) {
     // // Website you wish to allow to connect
-     res.setHeader('Access-Control-Allow-Origin', '*');
+     res.setHeader('Access-Control-Allow-Origin', 'https://mern-stack-frontend.onrender.com');
     
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods','GET','POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE');
@@ -37,7 +37,7 @@ app.use(function (req, res, next) {
     // Pass to next layer of middleware
     next();
 });
-*/
+
 app.get("/", (req, res)=> {
     res.send({"message":"connected sucess"});
 })
