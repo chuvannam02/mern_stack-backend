@@ -133,7 +133,7 @@ const authController = {
           domain:"onrender.com",
            sameSite: "None",
        secure: true,
-    // httpOnly: true,
+    httpOnly: false,
             path: "/",
           })
           .json({
@@ -171,7 +171,7 @@ const authController = {
         domain:"onrender.com",
           sameSite: "None",
        secure:true,
-    //httpOnly: true,
+    httpOnly: false,
           path: "/",
         })
         .status(200)
@@ -184,7 +184,7 @@ const authController = {
       domain:"onrender.com",
          sameSite: "None",
        secure: true,
-    //httpOnly: true,
+    httpOnly: false,
       path: "/",
     });
     refreshTokens = refreshTokens.filter(
