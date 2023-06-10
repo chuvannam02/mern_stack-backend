@@ -57,8 +57,7 @@ app.listen(port, ()=> {
 })
 
 mongoose.connect(process.env.MONGODB_URI,{
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+   useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true
   },
   (err) => {
     if (err) {
