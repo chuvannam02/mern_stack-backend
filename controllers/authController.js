@@ -130,10 +130,10 @@ const authController = {
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
-          domain:"mern-stack-frontend.onrender.com",
+          domain:".onrender.com",
            sameSite: "None",
        secure: true,
-    httpOnly: false,
+    httpOnly: true,
             path: "/",
           })
           .json({
@@ -168,12 +168,12 @@ const authController = {
 
       return res
         .cookie("refreshToken", newRefreshToken, {
-        domain:"mern-stack-frontend.onrender.com",
-          sameSite: "None",
-       secure:true,
-    httpOnly: false,
-          path: "/",
-        })
+          domain:".onrender.com",
+           sameSite: "None",
+       secure: true,
+    httpOnly: true,
+            path: "/",
+          })
         .status(200)
         .json({ accessToken: newAccessToken });
     });
@@ -181,12 +181,12 @@ const authController = {
   //   Log Out
   userLogout: async (req, res) => {
     res.clearCookie("refreshToken", {
-      domain:"mern-stack-frontend.onrender.com",
-         sameSite: "None",
+          domain:".onrender.com",
+           sameSite: "None",
        secure: true,
-    httpOnly: false,
-      path: "/",
-    });
+    httpOnly: true,
+            path: "/",
+          });
     refreshTokens = refreshTokens.filter(
       (token) => token !== req.cookies.refreshToken
     );
