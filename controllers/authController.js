@@ -134,8 +134,9 @@ const authController = {
           .cookie("refreshToken", refreshToken, {
           domain:".onrender.com",
            expires: new Date(Date.now() + oneDay),
-    secure: process.env.NODE_ENV === "production",
-    signed: true,
+    secure: true,
+        httpOnly: true,
+        sameSite: 'lax',
             path: "/",
           })
           .json({
@@ -172,8 +173,9 @@ const authController = {
         .cookie("refreshToken", newRefreshToken, {
           domain:".onrender.com",
            expires: new Date(Date.now() + oneDay),
-    secure: process.env.NODE_ENV === "production",
-    signed: true,
+     secure: true,
+        httpOnly: true,
+        sameSite: 'lax',
             path: "/",
           })
         .status(200)
@@ -186,8 +188,9 @@ const authController = {
     res.clearCookie("refreshToken",  {
           domain:".onrender.com",
            expires: new Date(Date.now() + oneDay),
-    secure: process.env.NODE_ENV === "production",
-    signed: true,
+    secure: true,
+        httpOnly: true,
+        sameSite: 'lax',
             path: "/",
           });
     refreshTokens = refreshTokens.filter(
