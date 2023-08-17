@@ -136,7 +136,7 @@ const authController = {
            expires: new Date(Date.now() + oneDay),
     secure: true,
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'None',
             path: "/",
           })
           .json({
@@ -175,7 +175,7 @@ const authController = {
            expires: new Date(Date.now() + oneDay),
      secure: true,
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'None',
             path: "/",
           })
         .status(200)
@@ -190,7 +190,7 @@ const authController = {
            expires: new Date(Date.now() + oneDay),
     secure: true,
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'None',
             path: "/",
           });
     refreshTokens = refreshTokens.filter(
