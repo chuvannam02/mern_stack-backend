@@ -11,6 +11,7 @@ const authController = {
   // Register
   registerUser: async (req, res) => {
     try {
+      
       const { email, name, password, address, phonenumber } = req.body;
       if (!email) {
         return res
@@ -126,14 +127,15 @@ const authController = {
         if (!refreshToken) {
           throw new Error();
         }
+        const oneDay = 1000 * 60 * 60 * 24;
         const { password, ...others } = user._doc;
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
           domain:".onrender.com",
-           sameSite: "None",
-       secure: true,
-    httpOnly: true,
+           expires: new Date(Date.now() + oneDay),
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
             path: "/",
           })
           .json({
@@ -165,13 +167,13 @@ const authController = {
       const newAccessToken = authController.generateAccessToken(user);
       const newRefreshToken = authController.generateRefreshToken(user);
       refreshTokens.push(newRefreshToken);
-
+      const oneDay = 1000 * 60 * 60 * 24;
       return res
         .cookie("refreshToken", newRefreshToken, {
           domain:".onrender.com",
-           sameSite: "None",
-       secure: true,
-    httpOnly: true,
+           expires: new Date(Date.now() + oneDay),
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
             path: "/",
           })
         .status(200)
@@ -180,11 +182,12 @@ const authController = {
   },
   //   Log Out
   userLogout: async (req, res) => {
-    res.clearCookie("refreshToken", {
+    const oneDay = 1000 * 60 * 60 * 24;
+    res.clearCookie("refreshToken",  {
           domain:".onrender.com",
-           sameSite: "None",
-       secure: true,
-    httpOnly: true,
+           expires: new Date(Date.now() + oneDay),
+    secure: process.env.NODE_ENV === "production",
+    signed: true,
             path: "/",
           });
     refreshTokens = refreshTokens.filter(
