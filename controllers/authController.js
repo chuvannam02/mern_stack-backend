@@ -6,7 +6,10 @@ const bodyparser = require("body-parser");
 dotenv.config();
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
+const client = require("../Redis");
+const mongoose = require("mongoose");
 let refreshTokens = [];
+
 const authController = {
   // Register
   registerUser: async (req, res) => {
@@ -44,7 +47,7 @@ const authController = {
       const registeredUser = await user.save();
 
       const payload = {
-        id: registeredUser._id,
+        _id: registeredUser._id,
         admin: registeredUser.admin,
       };
       const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
@@ -64,56 +67,136 @@ const authController = {
         },
       });
     } catch (error) {
-      return res.status(200).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
+    }
+  },
+  deleteTokenFromRedis: async (user_id) => {
+    const tokenExists = await new Promise((resolve, reject) => {
+      client.exists(
+        mongoose.isValidObjectId(user_id) ? user_id.toString() : user_id,
+        (err, reply) => {
+          if (err) {
+            reject(err);
+            console.error("Error retrieving token from Redis:", err);
+          }
+          resolve(reply === 1);
+        }
+      );
+    });
+    if (tokenExists) {
+      const refreshToken = await new Promise((resolve, reject) => {
+        client.del(
+          mongoose.isValidObjectId(user_id) ? user_id.toString() : user_id,
+          (err, reply) => {
+            if (err) {
+              reject(err);
+              console.error("Error removing token from Redis:", err.message);
+            }
+            resolve(reply === 1);
+          }
+        );
+      });
+      return refreshToken;
+    }
+  },
+  getTokenFromRedis: async (user_id) => {
+    const tokenExists = await new Promise((resolve, reject) => {
+      client.exists(
+        mongoose.isValidObjectId(user_id) ? user_id.toString() : user_id,
+        (err, reply) => {
+          if (err) {
+            reject(err);
+            console.error("Error retrieving token from Redis:", err.message);
+          }
+          resolve(reply === 1);
+        }
+      );
+    });
+    // console.log('====================================');
+    // console.log(tokenExists);
+    // console.log('====================================');
+    if (tokenExists) {
+      const refreshToken = await new Promise((resolve, reject) => {
+        client.get(
+          mongoose.isValidObjectId(user_id) ? user_id.toString() : user_id,
+          (err, reply) => {
+            if (err) {
+              reject(err);
+              console.error("Error retrieving token from Redis:", err.messgae);
+            }
+            // console.log(JSON.parse(reply)?.token);
+            resolve(JSON.parse(reply)?.token);
+          }
+        );
+      });
+      return refreshToken;
     }
   },
   //   GENERATE ACCESS TOKEN
   generateAccessToken: (user) => {
     return jwt.sign(
       {
-        id: user._id,
+        _id: user._id,
         admin: user.admin,
       },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: "30s",
+        expiresIn: "1h",
       }
     );
   },
   //   GENERATE REFRESH TOKEN
-  generateRefreshToken: (user) => {
-    return jwt.sign(
+  generateRefreshToken: async (user) => {
+    const refresh_Token = await jwt.sign(
       {
-        id: user._id,
+        _id: user._id,
         admin: user.admin,
       },
       process.env.REFRESH_TOKEN_SECRET,
       {
-        expiresIn: "365d",
+        expiresIn: "3d",
       }
     );
+    const setToken = await new Promise((resolve, reject) => {
+      client.get(
+        mongoose.isValidObjectId(user._id) ? user._id.toString() : user._id,
+        async (err, data) => {
+          if (err) reject(err.message);
+          client.set(
+            user._id.toString(),
+            JSON.stringify({ token: refresh_Token })
+          );
+          resolve(true);
+        }
+      );
+    });
+    if (setToken) return refresh_Token;
   },
   loginUser: async (req, res) => {
     try {
       const { email, password } = req.body;
       if (!email) {
-        return res.status(400).json("You must enter an email address");
+        return res
+          .status(400)
+          .json({ message: "You must enter an email address" });
       }
 
       if (!password) {
-        return res.status(400).json("You must enter a password");
+        return res.status(400).json({ message: "You must enter a password" });
       }
 
       if (!email && !password) {
-        return res.status(400).json("You must enter all fields");
+        return res.status(400).json({ message: "You must enter all fields" });
       }
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json("No user found for this email address");
+        return res
+          .status(404)
+          .json({ message: "No user found for this email address" });
       }
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        return res.status(401).json("Password Incorrect");
+        return res.status(401).json({ message: "Invalid email or password" });
       }
       if (validPassword && user) {
         const accessToken = authController.generateAccessToken(user);
@@ -122,11 +205,12 @@ const authController = {
         }
         const refreshToken = authController.generateRefreshToken(user);
         refreshTokens.push(refreshToken);
-
         if (!refreshToken) {
           throw new Error();
         }
+
         const { password, ...others } = user._doc;
+
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
@@ -137,52 +221,96 @@ const authController = {
             success: true,
             accessToken: `Bearer ${accessToken}`,
             user: {
-              ...others,
+              _id: others._id,
+              name: others.name,
+              email: others.email,
+              admin: others.admin,
             },
           });
       }
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res
+        .status(500)
+        .json({ message: "Server error", detailed: error.message });
     }
   },
-  requestRefreshToken: async (req, res, refreshToken1) => {
+  requestRefreshToken: async (req, res) => {
     // Take refresh token from user
     // const refreshToken = req.cookies.refreshToken;
-    const refreshToken = req.body.refreshToken1;
-    if (!refreshToken) return res.status(401).json("You are not authenticated");
-    if (!refreshTokens.includes(refreshToken)) {
-      return res.status(403).json("Refresh Token is not valid");
-    }
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-      if (err) {
-        console.log(err);
-      }
-      refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
-      // Create new accessToken, refresh token
-      const newAccessToken = authController.generateAccessToken(user);
-      const newRefreshToken = authController.generateRefreshToken(user);
-      refreshTokens.push(newRefreshToken);
+    // const refreshToken = req.body.refreshToken1;
+    const user = req.body;
+    // console.log(user.user._id);
+    const refreshToken1 = await authController.getTokenFromRedis(user.user._id);
+    // if (!refreshToken) return res.status(401).json("You are not authenticated");
+    // console.log(refreshToken1);
+    if (!refreshToken1)
+      return res.status(401).json("You are not authenticated");
+    // if (!refreshTokens.includes(refreshToken)) {
+    //   return res.status(403).json("Refresh Token is not valid");
+    // }
+    jwt.verify(
+      refreshToken1,
+      process.env.REFRESH_TOKEN_SECRET,
+      (err, user) => {
+        if (err) {
+          console.log(err);
+        }
+        // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+        // Create new accessToken, refresh token
+        // refreshTokens.push(newRefreshToken);
 
-      return res
-        .cookie("refreshToken", newRefreshToken, {
-          sameSite: "Lax",
-          path: "/",
-        })
-        .status(200)
-        .json({ accessToken: newAccessToken });
-    });
+        const newAccessToken = authController.generateAccessToken(user);
+
+        const newRefreshToken = authController.generateRefreshToken(user);
+        return res
+          .cookie("refreshToken", newRefreshToken, {
+            sameSite: "Lax",
+            path: "/",
+          })
+          .status(200)
+          .json({ accessToken: newAccessToken });
+      }
+    );
   },
   //   Log Out
   userLogout: async (req, res) => {
-    res.clearCookie("refreshToken", {
-      sameSite: "Lax",
-      path: "/",
-    });
-    refreshTokens = refreshTokens.filter(
-      (token) => token !== req.cookies.refreshToken
-    );
-    res.status(200).json("Logged out successfully");
+    const _id = req.body.id;
+
+    // Delete the user's token using async/await
+    try {
+      const delToken = await new Promise((resolve, reject) => {
+        client.del(
+          mongoose.isValidObjectId(_id) ? _id.toString() : _id,
+          (err, data) => {
+            if (err) reject(err);
+            resolve(true);
+          }
+        );
+      });
+
+      // Remove the refresh token from the array
+      refreshTokens = refreshTokens.filter(
+        (token) => token !== req.cookies.refreshToken
+      );
+
+      // Clear the refreshToken cookie
+      res.clearCookie("refreshToken", {
+        sameSite: "Lax",
+        path: "/",
+      });
+
+      // If the token was deleted successfully, respond with success
+      if (delToken) {
+        return res.status(200).json("Logged out successfully");
+      } else {
+        return res.status(500).json("Failed to log out");
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json("Failed to log out");
+    }
   },
+
   forget_password: async (req, res) => {
     try {
       const email = req.body.email;

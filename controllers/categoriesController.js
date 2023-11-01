@@ -1,4 +1,4 @@
-const Categories = require("../models/Categories");
+const Categories = require("../models/Categories.model");
 const categoriesController = {
   // Get all categories
   getAllCategories: async (req, res) => {
@@ -22,8 +22,8 @@ const categoriesController = {
       const checked = await Categories.findOne({ name });
       if (checked) {
         return res.status(400).json({ message: "This category is exist" });
-      }else {
-        const Categ = new Categories({name});
+      } else {
+        const Categ = new Categories({ name });
         const newCateg = await Categ.save();
       }
     } catch (error) {

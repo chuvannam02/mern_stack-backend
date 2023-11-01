@@ -6,14 +6,31 @@ router.post("/register", authController.registerUser);
 router.post("/login", authController.loginUser);
 
 // Refresh
-router.post("/refresh",authController.requestRefreshToken);
+router.post(
+  "/refresh",
+  middlewareController.verifyToken,
+  authController.requestRefreshToken
+);
 
 // Logout
-router.post("/logout",authController.userLogout);
+router.post(
+  "/logout",
+  middlewareController.verifyToken,
+  authController.userLogout
+);
 
 // reset password
-router.patch("/reset-password/:token", authController.reset_password);
+router.patch(
+  "/reset-password/:token",
+  middlewareController.verifyToken,
+  authController.reset_password
+);
 
 // forget password
-router.post("/forget-password", authController.forget_password);
+router.post(
+  "/forget-password",
+  middlewareController.verifyToken,
+  authController.forget_password
+);
+
 module.exports = router;

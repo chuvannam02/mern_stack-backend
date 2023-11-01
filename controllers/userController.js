@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
+const client = require("../Redis");
 const userController = {
   // Get All Users
   getAllUsers: async (req, res) => {
@@ -104,8 +105,26 @@ const userController = {
   updateUser: async (req, res) => {
     try {
       const _id = req.params.id;
-      const result = await User.findByIdAndUpdate(_id, req.body, {
-        runValidators: true,
+      const existingUser = await User.findOne({ _id: _id });
+
+      if (!existingUser) {
+        throw new Error("User not found");
+      }
+      const updatedFields = req.body;
+      for (const [key, value] of Object.entries(updatedFields)) {
+        if (typeof value === "string") {
+          updatedFields[key] = value.trim();
+          if (value.trim() === null || value.trim() === "") {
+            delete updatedFields[key];
+          }
+        } else if (value === null) {
+          delete updatedFields[key];
+        }
+      }
+      // const result = await User.findByIdAndUpdate(_id, updatedFields, {
+      //   new: true,
+      // });
+      const result = await User.findOneAndUpdate({ _id: _id }, updatedFields, {
         new: true,
       });
       if (!result) {
@@ -130,19 +149,42 @@ const userController = {
       const _id = req.params.id;
       const result = await User.findByIdAndDelete(_id);
       if (!result) {
-        res.status(400).json({
+        return res.status(400).json({
+          id: _id,
           status: "FAILED",
           message: "Record is not deleted successfully",
         });
       } else {
-        res.status(200).json({
+        return res.status(200).json({
+          id: _id,
           status: "SUCCESS",
           message: "Record is deleted successfully",
           data: result,
         });
       }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error });
+    }
+  },
+  searchUser: async (req, res) => {
+    try {
+      searchString = req.query.name;
+      if (searchString) {
+        const result = await User.aggregate([
+          { $match: { name: { $regex: new RegExp(`^${searchString}`) } } },
+          { $project: { name: 1, email: 1, phonenumber: 1, address: 1 } },
+        ]);
+        if (result) {
+          return res.status(200).json({
+            status: "SUCCESS",
+            message: "search user successfully",
+            data: result,
+          });
+        }
+      } else {
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   },
 };

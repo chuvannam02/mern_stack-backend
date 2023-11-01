@@ -1,0 +1,41 @@
+POST http://localhost:3000/api/v1/product/create
+Content-Type: application/json
+
+{
+    "product":{
+        "productId": 1002,
+        "code": "P-1002",
+        "name": "Cookery",
+        "brand": "IPHONE",
+        "description": "asdasdas",
+        "specs":[
+            {
+                "k":"author",
+                "v":"CR7"
+            },
+            {
+                "k":"pages",
+                "v":"300"
+            }
+        ]
+    }
+}
+
+###
+POST http://localhost:3000/api/v1/inventory/create
+Content-Type: application/json
+{
+    "inventory":{
+        "productId":1001,
+        "quantity":1000,
+        "reservation":[],
+    },
+}
+
+###
+POST http://localhost:3000/api/v1/login
+Content-Type: application/json
+{
+    "email":"chunam@gmail.com",
+    "password":"chunam"
+}

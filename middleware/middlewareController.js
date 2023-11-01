@@ -6,6 +6,7 @@ const middlewareController = {
   // verify token
   verifyToken: (req, res, next) => {
     const token = req.headers.token;
+    // console.log(token);
     if (token) {
       // Bearer 1234125asd( lấy vế sau là token)
       const accessToken = token.split(" ")[1];
@@ -30,14 +31,15 @@ const middlewareController = {
     });
   },
   verifyTokenAndAdmin: (req, res, next) => {
-  middlewareController.verifyToken(req, res, () => {
-    if (req.user.admin === true) {
-      next();
-    } else {
-      res.status(403).json("You're not allowed to do that!");
-    }
-  });
-},
+    middlewareController.verifyToken(req, res, () => {
+      // console.log(req.user.admin);
+      if (req.user.admin === true) {
+        next();
+      } else {
+        res.status(403).json("You're not allowed to do that!");
+      }
+    });
+  },
 };
 
 module.exports = middlewareController;
