@@ -101,7 +101,7 @@ const userController = {
       res.status(500).json({ error: error.message });
     }
   },
-  //   Update a record
+  //   Update a record by using patch method
   updateUser: async (req, res) => {
     try {
       const _id = req.params.id;

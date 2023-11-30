@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema(
     price: Number,
     salePrice: Number,
     images: { type: Array, default: [] },
-    categoryId: { type: Array, default: [], ref: "Categories" },
+    categoryId: [{ type: mongoose.Schema.Types.ObjectId, ref: "Categories" }],
   },
   {
     collection: "products",

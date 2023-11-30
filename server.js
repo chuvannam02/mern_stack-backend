@@ -13,11 +13,15 @@ const cookieParser = require("cookie-parser");
 dotenv.config();
 const port = process.env.PORT || 3000;
 const corsOptions = {
+
   // origin: "http://localhost:3001",
   // origin: "http://127.0.0.1:5173",
-  origin:"http://localhost:5173",
+  origin: "http://localhost:5173",
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
+
+  // origin: 'https://mern-stack-frontend.onrender.com',
+  credentials: true,
 };
 const client = require("./Redis");
 
@@ -29,6 +33,15 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
+
+/*
+app.use(function (req, res, next) {
+    // // Website you wish to allow to connect
+     res.setHeader('Access-Control-Allow-Origin', 'https://mern-stack-frontend.onrender.com');
+
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods','GET','POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE');
+
 
 // app.use(function (req, res, next) {
 //   // // Website you wish to allow to connect
@@ -75,12 +88,17 @@ app.listen(port, () => {
   console.log(`Server is running on PORT: ${port}`);
 });
 
+
 //Connection mongoDB use mongoose
 mongoose.connect(
   process.env.MONGODB_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+  },
+mongoose.connect(process.env.MONGODB_URI,{
+   useNewUrlParser: true, useUnifiedTopology: true
+
   },
   (err) => {
     if (err) {
@@ -89,7 +107,8 @@ mongoose.connect(
       console.log("Connected to MongoDB");
     }
   }
-);
+));
+
 
 //test redis if it returns value
 app.get("/test_redis", async (req, res) => {
@@ -109,3 +128,11 @@ app.use("/api/v1", ProductRoute);
 app.use("/api/v1", CategoryRoute);
 app.use("/api/v1", InventoryRoute);
 // app.use("/api/checkout", StripeRoute);
+
+  // Routes
+  app.use(UserRoute);
+  app.use(AuthRoute);
+  app.use(ProductRoute);
+  app.use(CategoryRoute);
+
+

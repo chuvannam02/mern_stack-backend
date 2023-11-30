@@ -51,7 +51,7 @@ const authController = {
         admin: registeredUser.admin,
       };
       const token = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "3d",
+        expiresIn: "365d",
       });
 
       return res.status(200).json({
@@ -142,6 +142,8 @@ const authController = {
       process.env.ACCESS_TOKEN_SECRET,
       {
         expiresIn: "1h",
+
+        // expiresIn: "365d",
       }
     );
   },
@@ -209,12 +211,18 @@ const authController = {
           throw new Error();
         }
 
+        const oneDay = 1000 * 60 * 60 * 24;
+
         const { password, ...others } = user._doc;
 
         return res
           .status(200)
           .cookie("refreshToken", refreshToken, {
-            sameSite: "Lax",
+            domain: ".onrender.com",
+            expires: new Date(Date.now() + oneDay),
+            secure: true,
+            httpOnly: true,
+            sameSite: "None",
             path: "/",
           })
           .json({
@@ -237,6 +245,7 @@ const authController = {
   requestRefreshToken: async (req, res) => {
     // Take refresh token from user
     // const refreshToken = req.cookies.refreshToken;
+
     // const refreshToken = req.body.refreshToken1;
     const user = req.body;
     // console.log(user.user._id);
@@ -248,29 +257,25 @@ const authController = {
     // if (!refreshTokens.includes(refreshToken)) {
     //   return res.status(403).json("Refresh Token is not valid");
     // }
-    jwt.verify(
-      refreshToken1,
-      process.env.REFRESH_TOKEN_SECRET,
-      (err, user) => {
-        if (err) {
-          console.log(err);
-        }
-        // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
-        // Create new accessToken, refresh token
-        // refreshTokens.push(newRefreshToken);
-
-        const newAccessToken = authController.generateAccessToken(user);
-
-        const newRefreshToken = authController.generateRefreshToken(user);
-        return res
-          .cookie("refreshToken", newRefreshToken, {
-            sameSite: "Lax",
-            path: "/",
-          })
-          .status(200)
-          .json({ accessToken: newAccessToken });
+    jwt.verify(refreshToken1, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        console.log(err);
       }
-    );
+      // refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+      // Create new accessToken, refresh token
+      // refreshTokens.push(newRefreshToken);
+
+      const newAccessToken = authController.generateAccessToken(user);
+
+      const newRefreshToken = authController.generateRefreshToken(user);
+      return res
+        .cookie("refreshToken", newRefreshToken, {
+          sameSite: "Lax",
+          path: "/",
+        })
+        .status(200)
+        .json({ accessToken: newAccessToken });
+    });
   },
   //   Log Out
   userLogout: async (req, res) => {
@@ -309,6 +314,50 @@ const authController = {
       console.error(error);
       return res.status(500).json("Failed to log out");
     }
+
+    const refreshToken = req.body.refreshToken1;
+    if (!refreshToken) return res.status(401).json("You are not authenticated");
+    if (!refreshTokens.includes(refreshToken)) {
+      return res.status(403).json("Refresh Token is not valid");
+    }
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) {
+        console.log(err);
+      }
+      refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+      // Create new accessToken, refresh token
+      const newAccessToken = authController.generateAccessToken(user);
+      const newRefreshToken = authController.generateRefreshToken(user);
+      refreshTokens.push(newRefreshToken);
+      const oneDay = 1000 * 60 * 60 * 24;
+      return res
+        .cookie("refreshToken", newRefreshToken, {
+          domain: ".onrender.com",
+          expires: new Date(Date.now() + oneDay),
+          secure: true,
+          httpOnly: true,
+          sameSite: "None",
+          path: "/",
+        })
+        .status(200)
+        .json({ accessToken: newAccessToken });
+    });
+  },
+  //   Log Out
+  userLogout: async (req, res) => {
+    const oneDay = 1000 * 60 * 60 * 24;
+    res.clearCookie("refreshToken", {
+      domain: ".onrender.com",
+      expires: new Date(Date.now() + oneDay),
+      secure: true,
+      httpOnly: true,
+      sameSite: "None",
+      path: "/",
+    });
+    refreshTokens = refreshTokens.filter(
+      (token) => token !== req.cookies.refreshToken
+    );
+    res.status(200).json("Logged out successfully");
   },
 
   forget_password: async (req, res) => {
@@ -343,9 +392,8 @@ const authController = {
     try {
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        port: 465,
+        secure: true,
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
@@ -359,13 +407,14 @@ const authController = {
         html:
           "<p>Hii " +
           name +
-          ", Please copy the link<a href=http://localhost:3001/reset_password/" +
+          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=https://mern-stack-frontend.onrender.com/reset_password/" +
           token +
-          "> and reset your password " +
+          "> để tiến hành nhập mật khẩu mới" +
+          "</a>" +
           ": " +
-          "http://localhost:3001/reset_password/" +
+          "https://mern-stack-frontend.onrender.com/reset_password/" +
           token +
-          "</a> </p>",
+          "</p>",
       };
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
