@@ -18,12 +18,12 @@ const categoriesController = {
   },
   createAnCategory: async (req, res) => {
     try {
-      const { name } = req.body;
+      const { name, status } = req.body;
       const checked = await Categories.findOne({ name });
       if (checked) {
         return res.status(400).json({ message: "This category is exist" });
       } else {
-        const Categ = new Categories({ name });
+        const Categ = new Categories({ name, status });
         const newCateg = await Categ.save();
         return res.status(200).json({ success: true, data: newCateg });
       }
@@ -34,18 +34,26 @@ const categoriesController = {
   listItemCategories: async (req, res) => {
     try {
       const countDocuments = await Categories.countDocuments();
-      let { page , limit} = req.query;
+      let { page, limit } = req.query;
       const skip = (page - 1) * limit;
       page = Number.parseInt(page);
       limit = Number.parseInt(limit);
       if (limit >= countDocuments) limit = countDocuments;
       const totalPage = Math.ceil(countDocuments / limit);
       const results = await Categories.find().limit(limit).skip(skip);
-      return res.status(200).json({ success: true,totalPage:totalPage,page:page,limit:limit, data: results });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          totalPage: totalPage,
+          page: page,
+          limit: limit,
+          data: results,
+        });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: error.message });
     }
-  }
+  },
 };
 module.exports = categoriesController;

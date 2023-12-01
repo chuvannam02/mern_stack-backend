@@ -8,7 +8,7 @@ router.post("/login", authController.loginUser);
 // Refresh
 router.post(
   "/refresh",
-  middlewareController.verifyToken,
+  // middlewareController.verifyToken,
   authController.requestRefreshToken
 );
 

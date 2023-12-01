@@ -4,8 +4,13 @@ const productController = require("../../controllers/productController");
 const middlewareController = require("../../middleware/middlewareController");
 
 // Get all products
-router.get("/product/all", productController.getAllProducts);
+router.get(
+  "/product/all",
+  middlewareController.verifyTokenAndAdmin,
+  productController.getAllProducts
+);
 
+router.get("/product-without-auth/all", productController.getAllProductsWithoutAuthenticate);
 // Get a product with id
 router.get("/product/find/:id", productController.getAProduct);
 

@@ -141,7 +141,7 @@ const authController = {
       },
       process.env.ACCESS_TOKEN_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "1d",
 
         // expiresIn: "365d",
       }

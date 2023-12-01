@@ -129,10 +129,5 @@ app.use("/api/v1", CategoryRoute);
 app.use("/api/v1", InventoryRoute);
 // app.use("/api/checkout", StripeRoute);
 
-  // Routes
-  app.use(UserRoute);
-  app.use(AuthRoute);
-  app.use(ProductRoute);
-  app.use(CategoryRoute);
 
 

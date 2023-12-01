@@ -24,8 +24,7 @@ const Product = require("../models/Product.model");
 //   }
 // });
 const productController = {
-  // Get all Products
-  getAllProducts: async (req, res) => {
+  getAllProductsWithoutAuthenticate: async (req, res) => {
     try {
       const result = await Product.find({});
       if (!result) {
@@ -35,6 +34,37 @@ const productController = {
         });
       } else {
         return res.status(200).json(result);
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+  // Get all Products
+  getAllProducts: async (req, res) => {
+    const countDocuments = await Product.countDocuments();
+    let { page, limit } = req.query;
+    const skip = (page - 1) * limit;
+    page = Number.parseInt(page) || 1;
+    limit = Number.parseInt(limit) || 5;
+    if (limit >= countDocuments) limit = countDocuments;
+    const totalPage = Math.ceil(countDocuments / limit);
+    try {
+     const results = await Product.find().limit(limit).skip(skip);
+      if (!results.length) {
+        return res.status(404).json({
+          status: "FAILED",
+          message: "Not found record",
+        });
+      } else {
+        return res
+        .status(200)
+        .json({
+          success: true,
+          totalPage: totalPage,
+          page: page,
+          limit: limit,
+          data: results,
+        });
       }
     } catch (error) {
       return res.status(500).json({ error: error.message });
