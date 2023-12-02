@@ -10,7 +10,14 @@ router.get(
   productController.getAllProducts
 );
 
-router.get("/product-without-auth/all", productController.getAllProductsWithoutAuthenticate);
+router.get(
+  "/product-without-authv1/all",
+  productController.getAllProductsWithoutAuthenticatev1
+);
+router.get(
+  "/product-without-auth/all",
+  productController.getAllProductsWithoutAuthenticate
+);
 // Get a product with id
 router.get("/product/find/:id", productController.getAProduct);
 

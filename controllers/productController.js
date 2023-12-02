@@ -24,19 +24,64 @@ const Product = require("../models/Product.model");
 //   }
 // });
 const productController = {
-  getAllProductsWithoutAuthenticate: async (req, res) => {
+  getAllProductsWithoutAuthenticatev1: async (req, res) => {
     try {
       const result = await Product.find({});
-      if (!result) {
-        return res.status(404).json({
-          status: "FAILED",
-          message: "Not found record",
-        });
-      } else {
-        return res.status(200).json(result);
-      }
+      return res.status(200).json(result);
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+  getAllProductsWithoutAuthenticate: async (req, res) => {
+    try {
+      let { page = 1, limit = 5, name, category } = req.query;
+      page = Number.parseInt(page);
+      limit = Number.parseInt(limit);
+
+      const query = {};
+
+      if (category) {
+        query.categoryId = category; // Assuming categoryId is the ID of the category
+      }
+
+      const skip = (page - 1) * limit;
+
+      let result;
+      if (name) {
+        result = await Product.find(query)
+          .skip(skip)
+          .limit(limit)
+          .find({ name: { $regex: name, $options: "i" } });
+      } else {
+        result = await Product.find(query).skip(skip).limit(limit);
+      }
+
+      if (!result || result.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No records found",
+        });
+      }
+
+      const countDocuments = await Product.countDocuments(query);
+      const totalPage = Math.ceil(countDocuments / limit);
+
+      return res.status(200).json({
+        success: true,
+        totalPage,
+        totalItems: countDocuments,
+        page,
+        limit,
+        data: result,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
     }
   },
   // Get all Products
@@ -49,16 +94,14 @@ const productController = {
     if (limit >= countDocuments) limit = countDocuments;
     const totalPage = Math.ceil(countDocuments / limit);
     try {
-     const results = await Product.find().limit(limit).skip(skip);
+      const results = await Product.find().limit(limit).skip(skip);
       if (!results.length) {
         return res.status(404).json({
           status: "FAILED",
           message: "Not found record",
         });
       } else {
-        return res
-        .status(200)
-        .json({
+        return res.status(200).json({
           success: true,
           totalPage: totalPage,
           page: page,
@@ -73,7 +116,9 @@ const productController = {
   getAProduct: async (req, res) => {
     try {
       const { id } = req.params;
-      // const result = await Product.find({"data.id":{$eq:id}});
+      const result = await Product.findOne({ productId: { $eq: id } }).populate(
+        "categoryId"
+      );
       if (!result) {
         return res.status(404).json({
           status: "FAILED",
