@@ -8,6 +8,7 @@ const AuthRoute = require("./routes/api/AuthRoute");
 const ProductRoute = require("./routes/api/ProductRoute");
 const CategoryRoute = require("./routes/api/CategoryRoute");
 const InventoryRoute = require("./routes/api/InventoryRoute");
+const StripeRoute = require("./routes/api/StripeRoute");
 // const StripeRoute = require("./routes/api/Stripe");
 const cookieParser = require("cookie-parser");
 dotenv.config();
@@ -127,7 +128,7 @@ app.use(AuthRoute);
 app.use("/api/v1", ProductRoute);
 app.use("/api/v1", CategoryRoute);
 app.use("/api/v1", InventoryRoute);
-// app.use("/api/checkout", StripeRoute);
+app.use("/api/v1/checkout", StripeRoute);
 
 
 
