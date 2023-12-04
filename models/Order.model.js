@@ -11,6 +11,7 @@ const OrderSchema = new Schema({
     //     name:String,
     //     address:String,
     //     state:String,
+    //      email:String,
 
     // },
     payment:Object,
@@ -27,6 +28,9 @@ const OrderSchema = new Schema({
     //         quantity:Number
     //     }
     // ]
+    delivery_status:String,
+    total:Number,
+    subTotal:Number,
     
 },{
     // collection:'orders',
