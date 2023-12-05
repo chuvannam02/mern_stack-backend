@@ -2,7 +2,7 @@ const {Schema, model} = require('mongoose');
 
 //Cart model
 const CartSchema = new Schema({
-    userId:Number,
+    userId:String,
     cartId:Number,
     status:{
         type:String,

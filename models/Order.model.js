@@ -4,7 +4,7 @@ const {Schema, model} = require('mongoose');
 
 const OrderSchema = new Schema({
     cartId:Number,
-    userId:Number,
+    userId:String,
     orderId:Number,
     shipping:Object, 
     // {

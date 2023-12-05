@@ -9,12 +9,12 @@ const ProductRoute = require("./routes/api/ProductRoute");
 const CategoryRoute = require("./routes/api/CategoryRoute");
 const InventoryRoute = require("./routes/api/InventoryRoute");
 const StripeRoute = require("./routes/api/StripeRoute");
+const WebhookRoute = require("./routes/api/webhook");
 // const StripeRoute = require("./routes/api/Stripe");
 const cookieParser = require("cookie-parser");
 dotenv.config();
 const port = process.env.PORT || 3000;
 const corsOptions = {
-
   // origin: "http://localhost:3001",
   // origin: "http://127.0.0.1:5173",
   origin: "http://localhost:5173",
@@ -30,11 +30,19 @@ const client = require("./Redis");
 // console.log(`node-redis version is ${require("redis/package.json").version}`);
 
 const app = express();
+// Add raw body middleware before other body parsers
+// app.use((req, res, next) => {
+//   express.raw({ type: 'application/json' })(req, res, (err) => {
+//     if (err) return next(err);
+//     next();
+//   });
+// });
+app.use("/api/v1", express.raw({ type: "application/json" }), WebhookRoute);
+
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 app.use(cookieParser());
-
 /*
 app.use(function (req, res, next) {
     // // Website you wish to allow to connect
@@ -89,7 +97,6 @@ app.listen(port, () => {
   console.log(`Server is running on PORT: ${port}`);
 });
 
-
 //Connection mongoDB use mongoose
 mongoose.connect(
   process.env.MONGODB_URI,
@@ -97,19 +104,21 @@ mongoose.connect(
     useNewUrlParser: true,
     useUnifiedTopology: true,
   },
-mongoose.connect(process.env.MONGODB_URI,{
-   useNewUrlParser: true, useUnifiedTopology: true
-
-  },
-  (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log("Connected to MongoDB");
+  mongoose.connect(
+    process.env.MONGODB_URI,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+    (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Connected to MongoDB");
+      }
     }
-  }
-));
-
+  )
+);
 
 //test redis if it returns value
 app.get("/test_redis", async (req, res) => {
@@ -128,7 +137,4 @@ app.use(AuthRoute);
 app.use("/api/v1", ProductRoute);
 app.use("/api/v1", CategoryRoute);
 app.use("/api/v1", InventoryRoute);
-app.use("/api/v1/checkout", StripeRoute);
-
-
-
+app.use("/api/v1", StripeRoute);
