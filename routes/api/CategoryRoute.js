@@ -10,4 +10,8 @@ router.post("/categories/create",middlewareController.verifyTokenAndAdmin,catego
 
 //List item categories
 router.get("/categories",middlewareController.verifyTokenAndAdmin,categoriesController.listItemCategories);
+
+//Combobox categories
+// ,middlewareController.verifyTokenAndAdmin
+router.get("/categories/combobox",middlewareController.verifyTokenAndAdmin,categoriesController.comboboxCategories);
 module.exports = router;

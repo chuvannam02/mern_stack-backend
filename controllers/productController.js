@@ -1,4 +1,13 @@
 const Product = require("../models/Product.model");
+const multer = require("multer");
+const cloudinary = require("../config/cloudinary");
+const fs = require("fs");
+const storage = multer.diskStorage({
+  filename: function (req, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 // //GET ALL PRODUCTS
 // router.get("/", async (req, res) => {
 //   const qNew = req.query.new;
@@ -135,7 +144,45 @@ const productController = {
   // create a new Product
   AddAProduct: async (req, res) => {
     try {
-      const { product } = req.body;
+      const uploader = async (path) => await cloudinary.uploader.upload(path);
+      const urls = [];
+      const files = req.files;
+      for (const file of files) {
+        const { path } = file;
+        const newPath = await uploader(path);
+        urls.push(newPath);
+        fs.unlinkSync(path);
+      }
+      let productId;
+      let existingProduct;
+      do {
+        productId = Math.floor(Math.random() * 1000000);
+        existingProduct = await Product.findOne({ productId: productId });
+      } while (existingProduct);
+      const {
+        code,
+        name,
+        brand,
+        description,
+        releaseDate,
+        specs,
+        price,
+        salePrice,
+        categoryId,
+      } = req.body;
+      const product = new Product({
+        productId: productId,
+        code,
+        name,
+        brand,
+        description,
+        releaseDate,
+        specs,
+        price,
+        salePrice,
+        images: urls,
+        categoryId,
+      });
       const result = await Product.create(product);
       const savedProduct = await result.save();
       if (savedProduct) {

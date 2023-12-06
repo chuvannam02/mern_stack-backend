@@ -2,7 +2,13 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../../controllers/productController");
 const middlewareController = require("../../middleware/middlewareController");
-
+const multer = require("multer");
+const storage = multer.diskStorage({
+  filename: function (req, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 // Get all products
 router.get(
   "/product/all",
@@ -24,6 +30,7 @@ router.get("/product/find/:id", productController.getAProduct);
 // create a new product
 router.post(
   "/product/create",
+  upload.array("images"),
   middlewareController.verifyTokenAndAdmin,
   productController.AddAProduct
 );
