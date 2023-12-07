@@ -14,6 +14,7 @@ router.get("/categories",middlewareController.verifyTokenAndAdmin,categoriesCont
 //Combobox categories
 // ,middlewareController.verifyTokenAndAdmin
 router.get("/categories/combobox",middlewareController.verifyTokenAndAdmin,categoriesController.comboboxCategories);
+router.get("/categories/combobox-without-auth",categoriesController.comboboxCategoriesWithoutAuth);
 
 router.delete("/categories/delete/:id",middlewareController.verifyTokenAndAdmin,categoriesController.removeACategory);
 

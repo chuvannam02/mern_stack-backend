@@ -64,6 +64,14 @@ const categoriesController = {
       return res.status(500).json({ error: error.message });
     }
   },
+  comboboxCategoriesWithoutAuth: async (req, res) => {
+    try {
+      const results = await Categories.find({ status: "active" });
+      return res.status(200).json({ success: true, data: results });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
   removeACategory: async (req, res) => {
     try {
       const { id } = req.params;
