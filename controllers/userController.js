@@ -49,7 +49,9 @@ const userController = {
   },
   // Create a new User
   createUser: async (req, res) => {
-    const { password, name, email, phonenumber, address } = req.body;
+    let dataRequest = req.body.toString();
+    let json = JSON.parse(dataRequest);
+    const { password, name, email, phonenumber, address } = json;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -110,7 +112,9 @@ const userController = {
       if (!existingUser) {
         throw new Error("User not found");
       }
-      const updatedFields = req.body;
+      let dataRequest = req.body.toString();
+      let json = JSON.parse(dataRequest);
+      const updatedFields = json;
       for (const [key, value] of Object.entries(updatedFields)) {
         if (typeof value === "string") {
           updatedFields[key] = value.trim();

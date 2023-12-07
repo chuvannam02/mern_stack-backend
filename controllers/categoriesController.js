@@ -18,7 +18,9 @@ const categoriesController = {
   },
   createAnCategory: async (req, res) => {
     try {
-      const { name, status } = req.body;
+      let data = req.body.toString();
+      let json = JSON.parse(data);
+      const { name, status } = json;
       const checked = await Categories.findOne({ name });
       if (checked) {
         return res.status(400).json({ message: "This category is exist" });
@@ -41,15 +43,14 @@ const categoriesController = {
       if (limit >= countDocuments) limit = countDocuments;
       const totalPage = Math.ceil(countDocuments / limit);
       const results = await Categories.find().limit(limit).skip(skip);
-      return res
-        .status(200)
-        .json({
-          success: true,
-          totalPage: totalPage,
-          page: page,
-          limit: limit,
-          data: results,
-        });
+      return res.status(200).json({
+        success: true,
+        totalPage: totalPage,
+        page: page,
+        limit: limit,
+        data: results,
+        totalItems: countDocuments,
+      });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: error.message });
@@ -63,5 +64,59 @@ const categoriesController = {
       return res.status(500).json({ error: error.message });
     }
   },
+  removeACategory: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const result = await Categories.findByIdAndDelete(id);
+      return res.status(200).json({
+        success: true,
+        message: `Xoá danh mục ${result.name} thành công`,
+        result: result,
+      });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+  updateACategory: async (req, res) => {
+    try {
+      const { id } = req.params;
+      let data = req.body.toString();
+      let json = JSON.parse(data);
+      const { name, status } = json;
+      const checked = await Categories.findOne({ name });
+      if (checked) {
+        return res.status(400).json({ message: "This category is exist" });
+      } else {
+        const updatedFields = { name, status };
+        for (const [key, value] of Object.entries(updatedFields)) {
+          if (typeof value === "string") {
+            updatedFields[key] = value.trim();
+            if (value.trim() === null || value.trim() === "") {
+              delete updatedFields[key];
+            }
+          } else if (value === null) {
+            delete updatedFields[key];
+          }
+        }
+        const result = await Categories.findByIdAndUpdate(id, updatedFields, {
+          new: true,
+        });
+        if (!result) {
+          return res.status(400).json({
+            status: "FAILED",
+            message: "Record is not updated successfully",
+          });
+        } else {
+          return res.status(200).json({
+            status: "SUCCESS",
+            message: "Record is updated successfully",
+            data: result,
+          });
+        }
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 };
 module.exports = categoriesController;

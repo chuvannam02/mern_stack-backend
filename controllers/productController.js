@@ -116,6 +116,7 @@ const productController = {
           page: page,
           limit: limit,
           data: results,
+          totalItems: countDocuments,
         });
       }
     } catch (error) {

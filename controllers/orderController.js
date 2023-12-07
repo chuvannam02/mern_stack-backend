@@ -62,6 +62,35 @@ const orderController = {
       });
     }
   },
+  getAllOrder: async (req, res) => {
+    const countDocuments = await Order.countDocuments();
+    let { page, limit } = req.query;
+    const skip = (page - 1) * limit;
+    page = Number.parseInt(page) || 1;
+    limit = Number.parseInt(limit) || 5;
+    if (limit >= countDocuments) limit = countDocuments;
+    const totalPage = Math.ceil(countDocuments / limit);
+    try {
+      const results = await Order.find().limit(limit).skip(skip);
+      if (!results.length) {
+        return res.status(404).json({
+          status: "FAILED",
+          message: "Not found record",
+        });
+      } else {
+        return res.status(200).json({
+          success: true,
+          totalPage: totalPage,
+          page: page,
+          limit: limit,
+          data: results,
+          totalItems: countDocuments,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
 };
 
 module.exports = orderController;

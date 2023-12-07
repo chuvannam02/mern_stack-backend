@@ -14,4 +14,8 @@ router.get("/categories",middlewareController.verifyTokenAndAdmin,categoriesCont
 //Combobox categories
 // ,middlewareController.verifyTokenAndAdmin
 router.get("/categories/combobox",middlewareController.verifyTokenAndAdmin,categoriesController.comboboxCategories);
+
+router.delete("/categories/delete/:id",middlewareController.verifyTokenAndAdmin,categoriesController.removeACategory);
+
+router.put("/categories/update/:id",middlewareController.verifyTokenAndAdmin,categoriesController.updateACategory);
 module.exports = router;
