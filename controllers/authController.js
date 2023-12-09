@@ -271,7 +271,10 @@ const authController = {
       const newRefreshToken = authController.generateRefreshToken(user);
       return res
         .cookie("refreshToken", newRefreshToken, {
-          sameSite: "Lax",
+           domain: ".onrender.com",
+       secure: true,
+          httpOnly: true,
+          sameSite: "None",
           path: "/",
         })
         .status(200)
@@ -301,8 +304,11 @@ const authController = {
 
       // Clear the refreshToken cookie
       res.clearCookie("refreshToken", {
-        sameSite: "Lax",
-        path: "/",
+         domain: ".onrender.com",
+       secure: true,
+          httpOnly: true,
+          sameSite: "None",
+          path: "/",
       });
 
       // If the token was deleted successfully, respond with success
@@ -393,19 +399,19 @@ const authController = {
     try {
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
-        // port: 465,
-        // secure: true,
-        port: 587,
-        secure: false,
+         port: 465,
+        secure: true,
+        // port: 587,
+        // secure: false,
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASSWORD,
         },
-        tls: {
+       // tls: {
           // do not fail on invalid certs
-          rejectUnauthorized: false,
-        },
+         // rejectUnauthorized: false,
+//},
       });
       const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -415,12 +421,12 @@ const authController = {
           "<p>Hii " +
           name +
           // ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=https://mern-stack-frontend.onrender.com/reset_password/" +
-          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=http://localhost:5173/reset_password/" +
+          ", Vui lòng sao chép đường dẫn dưới đây (Hoặc ấn vào dòng chữ gạch chân)<a href=https://front-end-web-ecommerce.onrender.com/reset_password/" +
           token +
           "> để tiến hành nhập mật khẩu mới" +
           "</a>" +
           ": " +
-          "http://localhost:5173/reset_password/" +
+          "https://front-end-web-ecommerce.onrender.com/reset_password/" +
           token +
           "</p>",
       };
