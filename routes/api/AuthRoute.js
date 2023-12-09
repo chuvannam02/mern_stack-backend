@@ -29,7 +29,7 @@ router.patch(
 // forget password
 router.post(
   "/forget-password",
-  middlewareController.verifyToken,
+  // middlewareController.verifyToken,
   authController.forget_password
 );
 
