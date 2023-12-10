@@ -23,7 +23,6 @@ const corsOptions = {
   optionSuccessStatus: 200,
   origin:'https://front-end-web-ecommerce.onrender.com',
   // origin: 'https://mern-stack-frontend.onrender.com',
-  credentials: true,
 };
 const client = require("./Redis");
 
